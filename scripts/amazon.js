@@ -46,7 +46,8 @@
               Added
             </div>
 
-            <button class="add-to-cart-button button-primary">
+            <button class="add-to-cart-button button-primary js-add-to-cart"
+            data-product-id="${product.id}">
               Add to Cart
             </button>
           </div> `;
@@ -77,7 +78,14 @@
         quantity : 1
       });
     }
-    console.log(cart);
+    
+    let cartQuantity = 0;
+
+    cart.forEach((item) => {
+      cartQuantity += item.quantity;
+    });
+
+    document.querySelector('.js-cart-quantity').innerHTML=cartQuantity;
     });
   });
 
