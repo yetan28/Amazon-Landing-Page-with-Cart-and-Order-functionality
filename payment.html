@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Payment Gateway</title>
+  <style>
+
+      body {
+      font-family: 'Amazon Ember', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f3f3f3;
+      height: 100vh;
+    }
+    
+    header {
+      background-color:#FFD700;
+      color: black;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      margin-bottom: 250px;
+      justify-content: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    .payment-container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      width: 500px;
+      height:fit-content;
+      text-align: center;
+      margin: auto;
+    }
+
+    .payment-container h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .payment-container h2 {
+      font-size: 1.2rem;
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    .payment-container p {
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+
+    .payment-option {
+      display: flex;
+      align-items: center;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: border 0.3s ease;
+    }
+
+    .payment-option.selected {
+      border-color: #000;
+      background: #f5f5f5;
+    }
+
+    .payment-option span.icon {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      margin-right: 1rem;
+    }
+
+    .esewa .icon {
+      background-color: #08a534;
+    }
+
+    .khalti .icon {
+      background-color: #8b5cf6;
+    }
+
+    .pay-btn {
+      background-color:#FFD700;
+      color:black;
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+
+    .pay-btn:hover {
+      background-color: #fbfb25;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Amazon Payment</h1>
+  </header>
+ 
+  <div class="payment-container">
+    <h1>Payment Gateway</h1>
+
+    <h2>Choose Payment Method</h2>
+    <p>Select your preferred payment option</p>
+
+    <div class="payment-option esewa selected" data-method="esewa">
+      <span class="icon"></span>
+      <span>eSewa</span>
+    </div>
+
+    <div class="payment-option khalti" data-method="khalti">
+      <span class="icon"></span>
+      <span>Khalti</span>
+    </div>
+
+    <button class="pay-btn" id="pay-btn">Pay with eSewa</button>
+  </div>
+
+ m <script src="https://khalti.com/static/khalti-checkout.js"></script>
+ <script>
+   let selectedMethod = 'esewa';
+
+   const options = document.querySelectorAll('.payment-option');
+   const payBtn = document.getElementById('pay-btn');
+
+   options.forEach(option => {
+     option.addEventListener('click', () => {
+       options.forEach(o => o.classList.remove('selected'));
+       option.classList.add('selected');
+       selectedMethod = option.dataset.method;
+       payBtn.textContent = `Pay with ${selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1)}`;
+     });
+   });
+
+   payBtn.addEventListener('click', () => {
+     if (selectedMethod === 'esewa') {
+       // Submit eSewa form dynamically
+       const form = document.createElement('form');
+       form.action = 'https://uat.esewa.com.np/epay/main';
+       form.method = 'POST';
+       form.innerHTML = `
+         <input type="hidden" name="tAmt" value="105.56" />
+         <input type="hidden" name="amt" value="100.00" />
+         <input type="hidden" name="txAmt" value="5.56" />
+         <input type="hidden" name="psc" value="0" />
+         <input type="hidden" name="pdc" value="0" />
+         <input type="hidden" name="scd" value="EPAYTEST" />
+         <input type="hidden" name="pid" value="ORDER123" />
+         <input type="hidden" name="su" value="http://localhost:5500/success.html" />
+         <input type="hidden" name="fu" value="http://localhost:5500/failure.html" />
+       `;
+       document.body.appendChild(form);
+       form.submit();
+     } else if (selectedMethod === 'khalti') {
+       const checkout = new KhaltiCheckout({
+         publicKey: "test_public_key_dc74c2b3e84e4a0493f4c7f44b7e13a0",
+         productIdentity: "ORDER123",
+         productName: "Amazon Order",
+         productUrl: "http://localhost:5500/payment.html",
+         eventHandler: {
+           onSuccess(payload) {
+             alert("Payment Successful via Khalti!");
+             console.log(payload);
+           },
+           onError(error) {
+             console.log(error);
+           },
+           onClose() {
+             console.log('Khalti widget closed');
+           }
+         }
+       });
+
+       checkout.show({ amount: 10556 }); // Amount in paisa (e.g., Rs 105.56)
+     }
+   });
+ </script>
+</body>
+</html>

@@ -66,4 +66,11 @@ export function renderPaymentSummary() {
 
   document.querySelector('.js-payment-summary')
     .innerHTML = paymentSummaryHTML;
+
+  // Event listener to redirect on button click
+  document.querySelector('.place-order-button')
+    .addEventListener('click', () => {
+      window.location.href = 'payment.html';
+    });
 }
+
